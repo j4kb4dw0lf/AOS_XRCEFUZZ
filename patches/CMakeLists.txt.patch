@@ -1,0 +1,4 @@
+0a1,3
+> set(CMAKE_C_COMPILER "/app/aflnet/afl-clang")
+> set(CMAKE_CXX_COMPILER "/app/aflnet/afl-clang++")
+> 
