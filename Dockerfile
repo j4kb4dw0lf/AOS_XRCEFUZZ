@@ -44,17 +44,16 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Clone the repositories
-RUN git clone https://github.com/eProsima/Micro-XRCE-DDS/ Micro-XRCE-DDS-unpatched
-RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent/ Micro-XRCE-DDS-Agent-patched
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS/ Micro-XRCE-DDS
 RUN git clone https://github.com/aflnet/aflnet/
 
-# Replace Files in aflnet with patched files that work with micro-XRCE-DDS
-
-COPY ./patches/afl-fuzz.c /app/aflnet/afl-fuzz.c
-COPY ./patches/aflnet.h /app/aflnet/aflnet.h
-COPY ./patches/afl-replay.c /app/aflnet/afl-replay.c
-COPY ./patches/aflnet.c /app/aflnet/aflnet.c
-COPY ./patches/aflnet-replay.c /app/aflnet/aflnet-replay.c
+# Patch Files in aflnet with patches that work with micro-XRCE-DDS
+COPY ./patches /app/patches
+RUN patch /app/aflnet/afl-fuzz.c < /app/patches/afl-fuzz.c.patch && \
+    patch /app/aflnet/aflnet.h < /app/patches/aflnet.h.patch && \
+    patch /app/aflnet/afl-replay.c < /app/patches/afl-replay.c.patch && \
+    patch /app/aflnet/aflnet.c < /app/patches/aflnet.c.patch && \
+    patch /app/aflnet/aflnet-replay.c < /app/patches/aflnet-replay.c.patch
 
 ENV PATH="/usr/lib/llvm-11/bin:${PATH}"
 ENV LLVM_CONFIG="/usr/lib/llvm-11/bin/llvm-config"
@@ -74,38 +73,17 @@ RUN cd aflnet && make clean all && \
     export PATH=$PATH:$AFLNET && \
     export AFL_PATH=$AFLNET 
 
-# Replace Files in Micro-XRCE-DDS-Agent-patched and Micro-XRCE-DDS-unpatched with patched Makefile to instrument the binary for aflnet
+# Patch Files in Micro-XRCE-DDS with Makefile made to instrument the binary for aflnet
 
-COPY ./patches/CMakeLists_agent.txt /app/Micro-XRCE-DDS-Agent-patched/CMakeLists.txt
-COPY ./patches/CMakeLists_all.txt /app/Micro-XRCE-DDS-unpatched/CMakeLists.txt
+RUN patch /app/Micro-XRCE-DDS/CMakeLists.txt < /app/patches/CMakeLists.txt.patch
 
-# Build Micro-XRCE-DDS-unpatched
-RUN mkdir -p Micro-XRCE-DDS-unpatched/build && \
-    cd Micro-XRCE-DDS-unpatched/build && \
+# Build Micro-XRCE-DDS
+RUN mkdir -p Micro-XRCE-DDS/build && \
+    cd Micro-XRCE-DDS/build && \
     cmake .. -DUXRCE_BUILD_EXAMPLES=ON && \
     make && \
     make install && \
     cd ../..
-
-# Build Micro-XRCE-DDS-Agent-patched
-RUN mkdir -p Micro-XRCE-DDS-Agent-patched/build && \
-    cd Micro-XRCE-DDS-Agent-patched/build && \
-    cmake .. && \
-    make && \
-    cd ../.. 
-
-# Replace Files in Micro-XRCE-DDS-Agent-patched with patched files that prevent found crashes
-
-COPY ./patches/XRCETypes.cpp /app/Micro-XRCE-DDS-Agent-patched/src/cpp/types/XRCETypes.cpp
-COPY ./patches/InputMessage.hpp /app/Micro-XRCE-DDS-Agent-patched/include/uxr/agent/message/InputMessage.hpp
-
-# Rebuild Micro-XRCE-DDS-Agent-patched with the patches applied to the newly donloaded libraries during make
-
-RUN mkdir -p Micro-XRCE-DDS-Agent-patched/build && \
-    cd Micro-XRCE-DDS-Agent-patched/build && \
-    cmake .. && \
-    make && \
-    cd ../.. 
 
 # COPY ./scripts /app/scripts
 # Place script files to run fuzzying campains in the container
