@@ -107,7 +107,7 @@ RUN mkdir -p Micro-XRCE-DDS-Agent-patched/build && \
     make && \
     cd ../.. 
 
-COPY ./scripts /app/scripts
+# COPY ./scripts /app/scripts
 # Place script files to run fuzzying campains in the container
 #
 #

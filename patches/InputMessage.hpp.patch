@@ -1,0 +1,15 @@
+--- unpatched-files/InputMessage.hpp	2025-04-30 14:16:49.089104800 +0200
++++ patched-files/InputMessage.hpp	2025-04-29 22:17:49.349819332 +0200
+@@ -215,6 +215,12 @@
+         log_error();
+         rv = false;
+     }
++    catch(eprosima::fastcdr::exception::BadParamException& e)
++    {
++        std::cerr << "BadParamException: " << e.what() << std::endl;
++        log_error();
++        rv = false;
++    }
+     return rv;
+ }
+ 

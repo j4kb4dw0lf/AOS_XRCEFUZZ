@@ -1,0 +1,20 @@
+--- unpatched-files/afl-replay.c	2025-04-30 14:13:53.898411100 +0200
++++ patched-files/afl-replay.c	2025-04-29 22:17:49.349819332 +0200
+@@ -57,6 +57,8 @@
+   if (!strcmp(argv[2], "RTSP")) extract_response_codes = &extract_response_codes_rtsp;
+   else if (!strcmp(argv[2], "FTP")) extract_response_codes = &extract_response_codes_ftp;
+   else if (!strcmp(argv[2], "DNS")) extract_response_codes = &extract_response_codes_dns;
++  else if (!strcmp(argv[2], "DDS")) extract_response_codes = &extract_response_codes_dds;
++  else if (!strcmp(argv[2], "XRCE-DDS")) extract_response_codes = &extract_response_codes_xrce_dds;
+   else if (!strcmp(argv[2], "DTLS12")) extract_response_codes = &extract_response_codes_dtls12;
+   else if (!strcmp(argv[2], "DICOM")) extract_response_codes = &extract_response_codes_dicom;
+   else if (!strcmp(argv[2], "SMTP")) extract_response_codes = &extract_response_codes_smtp;
+@@ -80,7 +82,7 @@
+   usleep(server_wait_usecs);
+ 
+   int sockfd;
+-  if ((!strcmp(argv[2], "DTLS12")) || (!strcmp(argv[2], "DNS")) || (!strcmp(argv[2], "SIP"))) {
++  if ((!strcmp(argv[2], "DTLS12")) || (!strcmp(argv[2], "DNS")) || (!strcmp(argv[2], "SIP")) || (!strcmp(argv[2], "DDS")) || (!strcmp(argv[2], "XRCE-DDS"))) {
+     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   } else {
+     sockfd = socket(AF_INET, SOCK_STREAM, 0);

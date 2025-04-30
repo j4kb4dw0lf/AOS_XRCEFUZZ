@@ -1,0 +1,21 @@
+--- unpatched-files/XRCETypes.cpp	2025-04-30 14:16:24.444343000 +0200
++++ patched-files/XRCETypes.cpp	2025-04-29 22:17:49.349819332 +0200
+@@ -26,7 +26,7 @@
+ 
+ #include <uxr/agent/types/XRCETypes.hpp>
+ #include <fastcdr/Cdr.h>
+-
++#include <uxr/client/config.h>
+ #include <utility>
+ 
+ // Fast CDR SerDes specializations for XRCE Objects
+@@ -1136,6 +1136,9 @@
+         m_properties = temp_properties;
+     }
+     dcdr >> m_mtu;
++    if (m_mtu <= 0){
++        m_mtu = UXR_CONFIG_UDP_TRANSPORT_MTU;
++    }
+ }
+ 
+ dds::xrce::AGENT_Representation::AGENT_Representation()

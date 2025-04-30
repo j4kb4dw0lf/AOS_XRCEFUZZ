@@ -1,0 +1,15 @@
+--- unpatched-files/afl-fuzz.c	2025-04-30 14:13:08.026592200 +0200
++++ patched-files/afl-fuzz.c	2025-04-29 22:17:49.349819332 +0200
+@@ -9043,6 +9043,12 @@
+         } else if (!strcmp(optarg, "FTP")) {
+           extract_requests = &extract_requests_ftp;
+           extract_response_codes = &extract_response_codes_ftp;
++        } else if (!strcmp(optarg, "DDS")) {
++          extract_requests = &extract_requests_dds;
++          extract_response_codes = &extract_response_codes_dds;
++        } else if (!strcmp(optarg, "XRCE-DDS")) {
++          extract_requests = &extract_requests_xrce_dds;
++          extract_response_codes = &extract_response_codes_xrce_dds;
+         } else if (!strcmp(optarg, "MQTT")) {
+           extract_requests = &extract_requests_mqtt;
+           extract_response_codes = &extract_response_codes_mqtt;

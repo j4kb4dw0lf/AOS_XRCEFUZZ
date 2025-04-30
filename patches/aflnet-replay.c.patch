@@ -1,0 +1,22 @@
+--- unpatched-files/aflnet-replay.c	2025-04-30 14:13:40.838416300 +0200
++++ patched-files/aflnet-replay.c	2025-04-29 22:17:49.349819332 +0200
+@@ -56,7 +56,9 @@
+   else if (!strcmp(argv[2], "TFTP")) extract_response_codes = &extract_response_codes_tftp;
+   else if (!strcmp(argv[2], "NTP")) extract_response_codes = &extract_response_codes_NTP;
+   else if (!strcmp(argv[2], "DHCP")) extract_response_codes = &extract_response_codes_dhcp;
+-  else if (!strcmp(argv[2], "SNTP")) extract_response_codes = &extract_response_codes_SNTP;  
++  else if (!strcmp(argv[2], "SNTP")) extract_response_codes = &extract_response_codes_SNTP; 
++  else if (!strcmp(argv[2], "DDS")) extract_response_codes = &extract_response_codes_dds; 
++  else if (!strcmp(argv[2], "XRCE-DDS")) extract_response_codes = &extract_response_codes_xrce_dds; 
+ else {fprintf(stderr, "[AFLNet-replay] Protocol %s has not been supported yet!\n", argv[2]); exit(1);}
+ 
+   portno = atoi(argv[3]);
+@@ -78,7 +80,7 @@
+   }
+ 
+   int sockfd;
+-  if ((!strcmp(argv[2], "DTLS12")) || (!strcmp(argv[2], "DNS")) || (!strcmp(argv[2], "SIP"))) {
++  if ((!strcmp(argv[2], "DTLS12")) || (!strcmp(argv[2], "DNS")) || (!strcmp(argv[2], "SIP")) || (!strcmp(argv[2], "DDS")) || (!strcmp(argv[2], "XRCE-DDS"))) {
+     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+   } else {
+     sockfd = socket(AF_INET, SOCK_STREAM, 0);

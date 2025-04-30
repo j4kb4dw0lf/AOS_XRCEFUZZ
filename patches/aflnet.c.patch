@@ -1,0 +1,329 @@
+--- unpatched-files/aflnet.c	2025-04-30 14:13:20.650354200 +0200
++++ patched-files/aflnet.c	2025-04-29 22:17:49.349819332 +0200
+@@ -395,7 +395,6 @@
+   return regions;
+ }
+ 
+-
+ region_t* extract_requests_smtp(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref)
+ {
+    char *mem;
+@@ -1235,6 +1234,190 @@
+   *region_count_ref = region_count;
+   return regions;
+ }
++
++region_t* extract_requests_xrce_dds(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref) {
++            
++  region_t* regions = NULL;
++  unsigned int region_count = 0;
++  unsigned int cur_pos = 0;
++  unsigned int start_pos = 0;
++
++  while (cur_pos < buf_size) {
++      cur_pos += buf[cur_pos] >= 0x80 ? 4 : 8; // Skip RTPS header for this example
++      start_pos = cur_pos;
++  
++      // Iterate through submessages
++      while (cur_pos < buf_size) {
++          if (buf_size - cur_pos < 4) break; // Submessage header is at least 4 bytes
++          // Parse Submessage Header
++          uint8_t submessage_id = buf[cur_pos];
++          uint8_t flags = buf[cur_pos + 1];
++          uint16_t submessage_length;
++          // Read length based on endianness flag (bit 0 of flags)
++            if (flags & 0x01) { // Little-endian
++              submessage_length = *(uint16_t*)(buf + cur_pos + 2);
++            } else { // Big-endian
++              submessage_length = ntohs(*(uint16_t*)(buf + cur_pos + 2));
++            }
++
++            // Align submessage length to 4 bytes
++            if (submessage_length % 4 != 0) {
++              submessage_length += 4 - (submessage_length % 4);
++            }
++
++          // Calculate submessage end (header + payload)
++          unsigned int submessage_end = cur_pos + submessage_length + 4 ;
++
++          // Validate bounds
++          if (submessage_end > buf_size) {
++              submessage_end = buf_size;
++          }
++
++          cur_pos = submessage_end;
++          if ((cur_pos <= buf_size) && (buf[cur_pos] > 0xf)){
++              regions = (region_t*)ck_realloc(regions, (region_count + 1) * sizeof(region_t));
++              if (!regions) {
++                  *region_count_ref = 0;
++                  return NULL;
++              }
++              regions[region_count].start_byte = start_pos;
++              regions[region_count].end_byte = submessage_end - 1;
++              regions[region_count].state_sequence = NULL;
++              regions[region_count].state_count = 0;
++              region_count++;
++              break; // Found new header
++          }
++
++      }
++  }
++
++  // Fallback: Treat entire buffer as a single region if parsing fails
++  if (region_count == 0 && buf_size > 0) {
++      regions = (region_t*)ck_realloc(regions, sizeof(region_t));
++      if (!regions) {
++          *region_count_ref = 0;
++          return NULL;
++      }
++      regions[0].start_byte = 0;
++      regions[0].end_byte = buf_size - 1;
++      regions[0].state_sequence = NULL;
++      regions[0].state_count = 0;
++      region_count = 1;
++  }
++
++  *region_count_ref = region_count;
++  return regions;
++}
++
++region_t* extract_requests_dds(unsigned char* buf, unsigned int buf_size, unsigned int* region_count_ref) {
++              
++  region_t* regions = NULL;
++  unsigned int region_count = 0;
++  unsigned int cur_pos = 0;
++  unsigned int start_pos = 0;
++
++  printf("Extracting DDS requests... currpos: %d buffsize: %d\n", cur_pos, buf_size);
++  while (cur_pos < buf_size) {
++    printf("Current position: %d\n", cur_pos);
++
++      cur_pos += 20; // Skip RTPS header for this example
++      start_pos = cur_pos;
++  
++      // Iterate through submessages
++      while (cur_pos < buf_size) {
++          printf("Submessage start position: %d\n", start_pos);
++          if (buf_size - cur_pos < 4) break; // Submessage header is at least 4 bytes
++          //print 20 bytes from the current position
++          for (unsigned int i = 0; i < 20 && cur_pos + i < buf_size; i++) {
++              printf("%02X ", buf[cur_pos + i]);
++          }
++          printf("\n");
++
++
++          // Parse Submessage Header
++          uint8_t submessage_id = buf[cur_pos];
++          uint8_t flags = buf[cur_pos + 1];
++          uint16_t submessage_length;
++      
++          // Read length based on endianness flag (bit 0 of flags)
++          if (flags & 0x01) { // Little-endian
++              submessage_length = *(uint16_t*)(buf + cur_pos + 2);
++          } else { // Big-endian
++              submessage_length = ntohs(*(uint16_t*)(buf + cur_pos + 2));
++          }
++
++          // Calculate submessage end (header + payload)
++          unsigned int submessage_end = cur_pos + 4 + submessage_length;
++
++          // Validate bounds
++          if (submessage_end > buf_size) {
++              submessage_end = buf_size;
++          }
++          printf("Submessage id 0x%02X\n", submessage_id);
++          printf("Submessage lenght %d\n", submessage_length);
++          // Create a region for the submessage (e.g., DATA submessage)
++          /*if (submessage_id == 0x15) { // Example: Track DATA submessages
++              printf("creating region\n");
++              regions = (region_t*)ck_realloc(regions, (region_count + 1) * sizeof(region_t));
++              if (!regions) {
++                  *region_count_ref = 0;
++                  return NULL;
++              }
++              regions[region_count].start_byte = cur_pos;
++              regions[region_count].end_byte = submessage_end - 1;
++              regions[region_count].state_sequence = NULL;
++              regions[region_count].state_count = 0;
++              region_count++;
++          }*/
++
++          // Move to next submessage (submessages are 4-byte aligned)
++          cur_pos = submessage_end;
++          printf("Submessage end position: %d, now checking for RTPS\n", cur_pos);
++          for (unsigned int i = 0; i < 20 && cur_pos + i < buf_size; i++) {
++            printf("%02X ", buf[cur_pos + i]);
++          }
++          printf("\n");
++          if ((cur_pos + 4 <= buf_size) && memcmp(buf + cur_pos, "RTPS", 4) == 0){
++              printf("RTPS found, skip to next packet\n");
++              printf("creating region\n\n");
++              regions = (region_t*)ck_realloc(regions, (region_count + 1) * sizeof(region_t));
++              if (!regions) {
++                  *region_count_ref = 0;
++                  return NULL;
++              }
++              regions[region_count].start_byte = start_pos;
++              regions[region_count].end_byte = submessage_end - 1;
++              regions[region_count].state_sequence = NULL;
++              regions[region_count].state_count = 0;
++              region_count++;
++              break; // Found new RTPS header
++          }
++      }
++  }
++
++  // Fallback: Treat entire buffer as a single region if parsing fails
++  if (region_count == 0 && buf_size > 0) {
++      regions = (region_t*)ck_realloc(regions, sizeof(region_t));
++      if (!regions) {
++          *region_count_ref = 0;
++          return NULL;
++      }
++      regions[0].start_byte = 0;
++      regions[0].end_byte = buf_size - 1;
++      regions[0].state_sequence = NULL;
++      regions[0].state_count = 0;
++      region_count = 1;
++  }
++
++  *region_count_ref = region_count;
++  //print the regions and the number of regions
++  for (unsigned int i = 0; i < region_count; i++) {
++      printf("Region %d: Start: %u, End: %u\n", i, regions[i].start_byte, regions[i].end_byte);
++  }
++  return regions;
++}
++
++
+ unsigned int* extract_response_codes_tftp(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref)
+ {
+   char *mem;
+@@ -1558,7 +1741,7 @@
+   *state_count_ref = state_count;
+   return state_sequence;
+ }
+-unsigned int* extract_response_codes_smtp(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref)
++unsigned int *extract_response_codes_smtp(unsigned char *buf, unsigned int buf_size, unsigned int *state_count_ref)
+ {
+   char *mem;
+   unsigned int byte_count = 0;
+@@ -2325,6 +2508,118 @@
+   *state_count_ref = state_count;
+   return state_sequence;
+ }
++unsigned int* extract_response_codes_xrce_dds(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) {
++  unsigned int byte_count = 0;
++  unsigned int *state_sequence = NULL;
++  unsigned int state_count = 0;
++
++  // Submessage Header (4 bytes)
++  typedef struct {
++    uint8_t submessage_id;    // e.g., 0x15 = DATA, 0x06 = ACKNACK
++    uint8_t flags;            // Endianness (bit 0), length field presence (bit 1)
++    uint16_t submessage_len; // Length of submessage (excludes header)
++  } rtps_submessage_header_t;
++
++  // Initial state
++  state_sequence = (unsigned int *)ck_alloc(sizeof(unsigned int));
++  state_sequence[state_count++] = 0;
++
++  while (byte_count < buf_size) {
++
++    byte_count += 20; // Skip header (adjust if parsing GUID/vendor ID is needed)
++
++    // Iterate through submessages
++    while (byte_count + 4 <= buf_size) { // Ensure space for submessage header
++      rtps_submessage_header_t *sub_hdr = (rtps_submessage_header_t*)(buf + byte_count);
++      uint8_t submessage_id = sub_hdr->submessage_id;
++      uint8_t flags = sub_hdr->flags;
++      uint16_t submessage_len = sub_hdr->submessage_len;
++
++      // Handle endianness (RTPS uses CDR encoding)
++      int is_little_endian = (flags & 0x01);
++      if (!is_little_endian) {
++        // Convert big-endian to host byte order (if needed)
++        submessage_len = (submessage_len >> 8) | (submessage_len << 8);
++      }
++
++      // Record submessage type (e.g., 0x15 = DATA, 0x06 = ACKNACK)
++      state_sequence = (unsigned int *)ck_realloc(state_sequence, (state_count + 1) * sizeof(unsigned int));
++      state_sequence[state_count++] = submessage_id;
++
++      // Skip to next submessage (header + submessage_len)
++      byte_count += 4 + submessage_len;
++
++      // Handle padding (RTPS aligns to 4-byte boundaries)
++      if (submessage_len % 4 != 0) {
++        byte_count += 4 - (submessage_len % 4);
++      }
++
++    if ((byte_count + 4 <= buf_size) && (buf + byte_count, "RTPS", 4) == 0){
++      break; // Found new RTPS header
++    }
++  }
++  }
++
++  *state_count_ref = state_count;
++  return state_sequence;
++}
++
++unsigned int* extract_response_codes_dds(unsigned char* buf, unsigned int buf_size, unsigned int* state_count_ref) {
++  unsigned int byte_count = 0;
++  unsigned int *state_sequence = NULL;
++  unsigned int state_count = 0;
++
++  // Submessage Header (4 bytes)
++  typedef struct {
++    uint8_t submessage_id;    // e.g., 0x15 = DATA, 0x06 = ACKNACK
++    uint8_t flags;            // Endianness (bit 0), length field presence (bit 1)
++    uint16_t submessage_len; // Length of submessage (excludes header)
++  } rtps_submessage_header_t;
++
++  // Initial state
++  state_sequence = (unsigned int *)ck_alloc(sizeof(unsigned int));
++  state_sequence[state_count++] = 0;
++
++  while (byte_count < buf_size) {
++
++    byte_count += 20; // Skip header (adjust if parsing GUID/vendor ID is needed)
++
++    // Iterate through submessages
++    while (byte_count + 4 <= buf_size) { // Ensure space for submessage header
++      rtps_submessage_header_t *sub_hdr = (rtps_submessage_header_t*)(buf + byte_count);
++      uint8_t submessage_id = sub_hdr->submessage_id;
++      uint8_t flags = sub_hdr->flags;
++      uint16_t submessage_len = sub_hdr->submessage_len;
++
++      // Handle endianness (RTPS uses CDR encoding)
++      int is_little_endian = (flags & 0x01);
++      if (!is_little_endian) {
++        // Convert big-endian to host byte order (if needed)
++        submessage_len = (submessage_len >> 8) | (submessage_len << 8);
++      }
++
++      // Record submessage type (e.g., 0x15 = DATA, 0x06 = ACKNACK)
++      state_sequence = (unsigned int *)ck_realloc(state_sequence, (state_count + 1) * sizeof(unsigned int));
++      state_sequence[state_count++] = submessage_id;
++
++      // Skip to next submessage (header + submessage_len)
++      byte_count += 4 + submessage_len;
++
++      // Handle padding (RTPS aligns to 4-byte boundaries)
++      if (submessage_len % 4 != 0) {
++        byte_count += 4 - (submessage_len % 4);
++      }
++
++    if ((byte_count + 4 <= buf_size) && (buf + byte_count, "RTPS", 4) == 0){
++      break; // Found new RTPS header
++    }
++  }
++  }
++
++  *state_count_ref = state_count;
++  return state_sequence;
++}
++
+ 
+ // kl_messages manipulating functions
+ 
