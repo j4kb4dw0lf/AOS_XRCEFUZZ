@@ -17,8 +17,8 @@ for unpatched_file in "$UNPATCHED_DIR"/*; do
     if [ -f "$patched_file" ]; then
         # Crea la patch
         diff -u "$unpatched_file" "$patched_file" > "$PATCHES_DIR/$filename.patch"
-        echo "Patch generata: $PATCHES_DIR/$filename.patch"
+        echo "[OK]	Patch generated: $PATCHES_DIR/$filename.patch"
     else
-        echo "⚠️  File non trovato nella cartella patched-files: $filename"
+        echo "[ERROR]	File not found in folder patched-files: $filename"
     fi
 done
