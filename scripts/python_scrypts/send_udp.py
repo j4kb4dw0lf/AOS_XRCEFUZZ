@@ -4,7 +4,7 @@ import socket
 import base64
 
 def send_udp_packets(port, packets_data):
-    """Send multiple UDP packets to localhost on specified port using same source port"""
+
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         sock.bind(('localhost', 0))  # Bind to any available port
@@ -12,7 +12,7 @@ def send_udp_packets(port, packets_data):
         
         server_address = ('localhost', port)
         
-        print(f"Sending from source port {source_port} to destination port {port}")
+        print(f"[•] Sending from source port {source_port} to destination port {port}")
         
         for i, packet_data in enumerate(packets_data, 1):
             
@@ -20,7 +20,7 @@ def send_udp_packets(port, packets_data):
             sock.sendto(packet_bytes, server_address)
             
     except Exception as e:
-        print(f"Error sending packets: {e}")
+        print(f"[ERROR] sending packets: {e}")
     finally:
         sock.close()
 
@@ -33,3 +33,4 @@ if __name__ == "__main__":
     packets_data = sys.argv[2:]
     
     send_udp_packets(port, packets_data)
+    print("[OK] Exiting")

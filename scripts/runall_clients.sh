@@ -41,7 +41,7 @@ done
 
 # Function to kill all background jobs
 cleanup() {
-    echo "⏰ Timeout reached! Killing all launched processes..."
+    echo "[•] Timeout reached! Killing all launched processes..."
     for pid in "${pids[@]}"; do
         if kill "$pid" 2>/dev/null; then
             echo "[•] Killed process $pid"

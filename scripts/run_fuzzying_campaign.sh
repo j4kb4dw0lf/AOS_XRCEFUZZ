@@ -15,7 +15,7 @@ VERBOSITY=${5:-4}      # Default verbosity 4
 
 # Validate verbosity
 if [ "$VERBOSITY" -lt 0 ] || [ "$VERBOSITY" -gt 6 ]; then
-    echo "Error: Verbosity must be between 0-6"
+    echo "[ERROR] Verbosity must be between 0-6"
     exit 1
 fi
 

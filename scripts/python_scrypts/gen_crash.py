@@ -8,7 +8,6 @@ DATA = bytearray([
 )
 
 def create_raw_file():
-    """Creates a .raw file with hardcoded name and data"""
     
     if not FILENAME.endswith('.raw'):
         output_file = '../../crash_packets/' + FILENAME + '.raw'
