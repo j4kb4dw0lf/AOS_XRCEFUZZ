@@ -1,18 +1,11 @@
-# Use a base image with common development tools
+# Uisng 22.04 to have easy access to all needed deps
 FROM ubuntu:22.04
 
-# Set environment variables (optional, but good practice)
+# Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Update package list and install necessary packages:
-# - build-essential: for compiling C/C++ code
-# - cmake: build system for Micro-XRCE-DDS
-# - git: for cloning repositories
-# - automake, libtool, flex, bison: dependencies for aflnet
-# - libnl-3-dev, libnl-genl-3-dev: networking libraries for aflnet
-# - wget: useful for downloading things if needed later
-# - llvm, clang: compilers often used with AFL++ (aflnet's base)
-# - python3, python3-pip, python3-dev: for Python dependencies and tools
+
 RUN apt-get update && \
     apt-get install -y \
     build-essential \
@@ -55,6 +48,7 @@ RUN patch /app/aflnet/afl-fuzz.c < /app/patches/afl-fuzz.c.patch && \
     patch /app/aflnet/aflnet.c < /app/patches/aflnet.c.patch && \
     patch /app/aflnet/aflnet-replay.c < /app/patches/aflnet-replay.c.patch
 
+# Set environmental variables to build aflnet and Micro-XRCE-DDS
 ENV PATH="/usr/lib/llvm-11/bin:${PATH}"
 ENV LLVM_CONFIG="/usr/lib/llvm-11/bin/llvm-config"
 
@@ -74,7 +68,6 @@ RUN cd aflnet && make clean all && \
     export AFL_PATH=$AFLNET 
 
 # Patch Files in Micro-XRCE-DDS with Makefile made to instrument the binary for aflnet
-
 RUN patch /app/Micro-XRCE-DDS/CMakeLists.txt < /app/patches/CMakeLists.txt.patch
 
 # Build Micro-XRCE-DDS
@@ -85,13 +78,8 @@ RUN mkdir -p Micro-XRCE-DDS/build && \
     make install && \
     cd ../..
 
+# Copy all useful dirs from repo in the container
 COPY ./scripts /app/scripts
 COPY ./crash_packets /app/crash_packets
-
-# Place script files to run fuzzying campains in the container
-#
-#
-#
-#
 
 CMD ["/bin/bash"]
