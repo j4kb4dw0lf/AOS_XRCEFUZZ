@@ -86,6 +86,8 @@ RUN mkdir -p Micro-XRCE-DDS/build && \
     cd ../..
 
 COPY ./scripts /app/scripts
+COPY ./crash_packets /app/crash_packets
+
 # Place script files to run fuzzying campains in the container
 #
 #
