@@ -17,7 +17,7 @@ def extract_all_flows(pcap_file, server_port, output_dir):
                     flows[flow_id].append(bytes(udp.payload))
 
     if not flows:
-	    print("[ERROR]	No Packet Found")
+        print ("[ERROR]	No Packet Found")
         return
 
     os.makedirs(output_dir, exist_ok=True)
