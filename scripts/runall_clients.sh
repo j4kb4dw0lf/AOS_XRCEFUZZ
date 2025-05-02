@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd /app/Micro-XRCE-DDS/build/client/src/client-build/examples
-
 # Check for required arguments
 if [ $# -lt 2 ]; then
     echo "Usage: $0 <agent_port> <timeout_seconds>"
@@ -14,19 +12,19 @@ ARGS="localhost $PORT"
 
 # List of executables
 executables=(
-    "./PublishBigHelloWorld/PublishBigHelloWorldClient"
-    "./PingAgent/UDP/PingAgentUDP"
-    "./SubscribeHelloWorldBestEffort/SubscribeHelloWorldClientBestEffort"
-    "./PublishHelloWorldBestEffort/PublishHelloWorldClientBestEffort"
-    "./BinaryEntityCreation/BinaryEntityCreation"
-    "./PublishHelloWorld/PublishHelloWorldClient"
-    "./MultiSessionHelloWorld/MultiSessionHelloWorld"
-    "./SubscribeHelloWorld/SubscribeHelloWorldClient"
-    "./TimeSync/TimeSync"
-    "./ShapesDemo/ShapeDemoClient"
-    "./ContinuousFragment/ContinuousFragment"
-    "./TimeSyncWithCb/TimeSyncWithCb"
-    "./SubscribeBigHelloWorld/SubscribBigBigClient"
+    # "./../Micro-XRCE-DDS-Client/build/examples/PublishBigHelloWorld/PublishBigHelloWorldClient"
+    # "./../Micro-XRCE-DDS-Client/build/examples/PingAgent/UDP/PingAgentUDP"
+    # "./../Micro-XRCE-DDS-Client/build/examples/SubscribeHelloWorldBestEffort/SubscribeHelloWorldClientBestEffort"
+    # "./../Micro-XRCE-DDS-Client/build/examples/PublishHelloWorldBestEffort/PublishHelloWorldClientBestEffort"
+    # "./../Micro-XRCE-DDS-Client/build/examples/BinaryEntityCreation/BinaryEntityCreation"
+    "./../Micro-XRCE-DDS-Client/build/examples/PublishHelloWorld/PublishHelloWorldClient"
+    # "./../Micro-XRCE-DDS-Client/build/examples/MultiSessionHelloWorld/MultiSessionHelloWorld"
+    # "./../Micro-XRCE-DDS-Client/build/examples/SubscribeHelloWorld/SubscribeHelloWorldClient"
+    # "./../Micro-XRCE-DDS-Client/build/examples/TimeSync/TimeSync"
+    # "./../Micro-XRCE-DDS-Client/build/examples/ShapesDemo/ShapeDemoClient"
+    # "./../Micro-XRCE-DDS-Client/build/examples/ContinuousFragment/ContinuousFragment"
+    # "./../Micro-XRCE-DDS-Client/build/examples/TimeSyncWithCb/TimeSyncWithCb"
+    # "./../Micro-XRCE-DDS-Client/build/examples/SubscribeBigHelloWorld/SubscribBigBigClient"
 )
 
 # Launch all in parallel
@@ -62,4 +60,3 @@ cleanup
 
 echo "[OK] All parallel tasks completed or terminated after timeout."
 
-cd app

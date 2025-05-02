@@ -1,7 +1,5 @@
 #!/bin/bash
 
-cd /
-
 # Check for required arguments
 if [ $# -lt 3 ]; then
     echo "Usage: $0 <port> <output_dir> <capture_time> [campaign_time] [verbosity]"
@@ -32,7 +30,7 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 echo "[•] Starting MicroXRCEAgent on port $PORT with verbosity $VERBOSITY"
-./app/Micro-XRCE-DDS/build/agent/src/agent-build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
+./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
 AGENT_PID=$!
 
 sleep 2
@@ -40,11 +38,11 @@ sleep 2
 echo "[•] Launching clients and capturing traffic for $CAPTURE_TIME seconds"
 {
     # Run clients in background
-    ./app/scripts/runall_clients.sh "$PORT" "$CAPTURE_TIME" &
+    ./runall_clients.sh "$PORT" "$CAPTURE_TIME" &
     CLIENTS_PID=$!
     
     # Capture traffic in foreground
-    ./app/scripts/aflnet_pcap_pipeline.sh "$PORT" "$CAPTURE_TIME"
+    ./aflnet_pcap_pipeline.sh "$PORT" "$CAPTURE_TIME"
     
     # Wait for clients to finish (they should be done by now due to timeout)
     wait "$CLIENTS_PID"
@@ -63,18 +61,16 @@ mv "$PORT" "$SEEDS_DIR" 2>/dev/null || {
 echo "[•] Starting AFLNet fuzzer campaign (timeout: ${CAMPAIGN_TIME:-infinite} seconds)"
 if [ "$CAMPAIGN_TIME" -gt 0 ]; then
     timeout "$CAMPAIGN_TIME" \
-    ./app/aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
+    ./../aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
     -N "udp://127.0.0.1:$PORT" -R -P "XRCE-DDS" -m 100 \
-    ./app/Micro-XRCE-DDS/build/agent/src/agent-build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
+    ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
 else
-    ./app/aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
+    ./../aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
     -N "udp://127.0.0.1:$PORT" -R -P "XRCE-DDS" -m 100 \
-    ./app/Micro-XRCE-DDS/build/agent/src/agent-build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
+    ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
 fi
 FUZZER_PID=$!
 
 wait "$FUZZER_PID"
 
 echo "[OK] Fuzzing campaign completed"
-
-cd app
