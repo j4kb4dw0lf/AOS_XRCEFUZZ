@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /
+
 # Set environment variables
 export PATH="/usr/lib/llvm-11/bin:${PATH}"
 export LLVM_CONFIG="/usr/lib/llvm-11/bin/llvm-config"
@@ -13,4 +15,4 @@ cd /app/Micro-XRCE-DDS/build && \
 cmake .. -DUXRCE_BUILD_EXAMPLES=ON && \
 make && \
 make install && \
-cd ../../
+cd app

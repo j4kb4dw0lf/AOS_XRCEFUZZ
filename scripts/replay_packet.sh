@@ -18,4 +18,4 @@ for packet_file in "$@"; do
     PACKETS+=("$(base64 -w 0 "$packet_file")")
 done
 
-python3 send_udp.py "$PORT" "${PACKETS[@]}"
+python3 python_scripts/send_udp.py "$PORT" "${PACKETS[@]}"

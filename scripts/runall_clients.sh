@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /app/Micro-XRCE-DDS/build/client/src/client-build/examples
+
 # Check for required arguments
 if [ $# -lt 2 ]; then
     echo "Usage: $0 <agent_port> <timeout_seconds>"
@@ -60,3 +62,4 @@ cleanup
 
 echo "[OK] All parallel tasks completed or terminated after timeout."
 
+cd app

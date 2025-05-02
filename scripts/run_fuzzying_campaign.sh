@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /
+
 # Check for required arguments
 if [ $# -lt 3 ]; then
     echo "Usage: $0 <port> <output_dir> <capture_time> [campaign_time] [verbosity]"
@@ -38,11 +40,11 @@ sleep 2
 echo "[•] Launching clients and capturing traffic for $CAPTURE_TIME seconds"
 {
     # Run clients in background
-    ./runall_clients.sh "$PORT" "$CAPTURE_TIME" &
+    ./app/scripts/runall_clients.sh "$PORT" "$CAPTURE_TIME" &
     CLIENTS_PID=$!
     
     # Capture traffic in foreground
-    ./aflnet_pcap_pipeline.sh "$PORT" "$CAPTURE_TIME"
+    ./app/scripts/aflnet_pcap_pipeline.sh "$PORT" "$CAPTURE_TIME"
     
     # Wait for clients to finish (they should be done by now due to timeout)
     wait "$CLIENTS_PID"
@@ -74,3 +76,5 @@ FUZZER_PID=$!
 wait "$FUZZER_PID"
 
 echo "[OK] Fuzzing campaign completed"
+
+cd app
