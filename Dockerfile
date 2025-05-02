@@ -32,12 +32,12 @@ RUN apt-get update && \
     apt-get install -y clang-11 llvm-11 llvm-11-dev libclang-11-dev && \
     rm -rf /var/lib/apt/lists/*
 
-
 # Set working directory inside the container
 WORKDIR /app
 
 # Clone the repositories
-RUN git clone https://github.com/eProsima/Micro-XRCE-DDS/ Micro-XRCE-DDS
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent/ Micro-XRCE-DDS-Agent
+RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Client/ Micro-XRCE-DDS-Client
 RUN git clone https://github.com/aflnet/aflnet/
 
 # Patch Files in aflnet with patches that work with micro-XRCE-DDS
@@ -67,16 +67,29 @@ RUN cd aflnet && make clean all && \
     export PATH=$PATH:$AFLNET && \
     export AFL_PATH=$AFLNET 
 
-# Patch Files in Micro-XRCE-DDS with Makefile made to instrument the binary for aflnet
-RUN patch /app/Micro-XRCE-DDS/CMakeLists.txt < /app/patches/CMakeLists.txt.patch
-
-# Build Micro-XRCE-DDS
-RUN mkdir -p Micro-XRCE-DDS/build && \
-    cd Micro-XRCE-DDS/build && \
-    cmake .. -DUXRCE_BUILD_EXAMPLES=ON && \
+# Build Micro-XRCE-DDS-Client
+RUN mkdir -p Micro-XRCE-DDS-Client/build && \
+    cd Micro-XRCE-DDS-Client/build && \
+    cmake .. -DUCLIENT_BUILD_EXAMPLES=ON -DUCLIENT_INSTALL_EXAMPLES=ON && \
     make && \
     make install && \
     cd ../..
+
+# Patch Files in Micro-XRCE-DDS-Agent with Makefile made to instrument the binary for aflnet
+RUN patch /app/Micro-XRCE-DDS-Agent/CMakeLists.txt < /app/patches/CMakeLists.txt.patch
+
+# Build Micro-XRCE-DDS-Agnet
+RUN mkdir -p Micro-XRCE-DDS-Agent/build && \
+    cd Micro-XRCE-DDS-Agent/build && \
+    cmake .. && \
+    make && \
+    make install && \
+    cd ../..
+
+RUN apt update && \
+    apt install tcpdump
+
+RUN pip install scapy
 
 # Copy all useful dirs from repo in the container
 COPY ./scripts /app/scripts
