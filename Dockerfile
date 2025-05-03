@@ -25,7 +25,8 @@ RUN apt-get update && \
     python3-pip \
     python3-dev \
     software-properties-common \
-    gnupg && \
+    gnupg \
+    tmux && \
     wget -qO - https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor -o /usr/share/keyrings/llvm.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main" > /etc/apt/sources.list.d/llvm.list && \
     apt-get update && \
