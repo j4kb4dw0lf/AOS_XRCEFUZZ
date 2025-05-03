@@ -48,9 +48,8 @@ The recommended way to set up the environment is using the provided Dockerfile. 
 
 ## Running Fuzzing Campaigns
 
+In order to run fuzzing campaigns, all it takes is running the script `run_fuzzying_campaign.sh` that relying on various other scripts collects the seeds for the fuzzing, launches the agent and also the fuzzer.
 
-## Findings and Patches
+### Applying And Removing Patches
 
-
-### Applying Patches
-
+Using the two script `unpatch_agent.sh` and `patch_agent.sh` the agent can be patched and unpatched using the `.patch` files and said executable is rebuilt to apply the changes.
