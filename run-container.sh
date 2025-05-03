@@ -7,5 +7,10 @@ if [ "$(docker ps -aq -f name=$container_name)" ]; then
     docker start -ai $container_name
 else
     echo "Container $container_name does not exist. Creating and starting it..."
-    docker run -it --name=$container_name micro-xrce-dds-fuzzing-environment /bin/bash
+    docker run -it \
+        --name=$container_name \
+        -v $(pwd)/scripts:/app/scripts \
+        -v $(pwd)/crash_packets:/app/crash_packets \
+        micro-xrce-dds-fuzzing-environment \
+        /bin/bash
 fi

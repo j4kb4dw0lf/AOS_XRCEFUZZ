@@ -92,7 +92,7 @@ RUN apt update && \
 RUN pip install scapy
 
 # Copy all useful dirs from repo in the container
-COPY ./scripts /app/scripts
-COPY ./crash_packets /app/crash_packets
+# COPY ./scripts /app/scripts
+# COPY ./crash_packets /app/crash_packets
 
 CMD ["/bin/bash"]
