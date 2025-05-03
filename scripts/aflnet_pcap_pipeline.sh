@@ -21,6 +21,8 @@ echo "[OK] Capture completed: $PCAP_FILE"
 echo "[•] Extracting client flows towards server's port $PORT..."
 python3 "$PYTHON_SCRIPT" "$PCAP_FILE" "$PORT" "$PORT"
 
+rm "$PCAP_FILE"
+
 if [ $? -ne 0 ]; then
   echo "[ERROR] Failed to convert the .pcap file to .raw files"
   exit 1
