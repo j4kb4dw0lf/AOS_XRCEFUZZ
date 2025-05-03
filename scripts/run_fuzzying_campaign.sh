@@ -47,11 +47,14 @@ echo "[•] Launching clients and capturing traffic for $CAPTURE_TIME seconds"
     # Wait for clients to finish (they should be done by now due to timeout)
     wait "$CLIENTS_PID"
 } &
+CAPTURE_PID=$!
 
-wait
+wait "$CAPTURE_PID"
 
 SEEDS_DIR="/app/aflnet/seeds"
 mkdir -p "/app/aflnet/seeds"
+mkdir -p "/app/aflnet/outputs"
+rm -rf "$SEEDS_DIR/$PORT"
 echo "[•] Moving captured packets to seeds directory"
 mv "$PORT" "$SEEDS_DIR" 2>/dev/null || {
     echo "[ERROR] Failed to move captured packets to seeds directory"
@@ -62,11 +65,11 @@ echo "[•] Starting AFLNet fuzzer campaign (timeout: ${CAMPAIGN_TIME:-infinite}
 if [ "$CAMPAIGN_TIME" -gt 0 ]; then
     timeout "$CAMPAIGN_TIME" \
     ./../aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
-    -N "udp://127.0.0.1:$PORT" -R -P "XRCE-DDS" -m 100 \
+    -N "udp://127.0.0.1/$PORT" -R -P "XRCE-DDS" -m 100 \
     ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
 else
     ./../aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
-    -N "udp://127.0.0.1:$PORT" -R -P "XRCE-DDS" -m 100 \
+    -N "udp://127.0.0.1/$PORT" -R -P "XRCE-DDS" -m 100 \
     ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
 fi
 FUZZER_PID=$!
