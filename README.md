@@ -20,7 +20,8 @@ This repository serves as a central hub for all artifacts produced during the pr
 * `crash_packets/`: Contains the packets identified as sources of crashes within the agent, useful to reproduce the crashes also outside of the fuzzing environment.
 * `patched-files/`: Contains the patched files used to produce (`.patch`) files. 
 * `unpatched-files/`: Contains the unpatched versions of the patched files.
-* `build.sh`: File used to build and run the contanier produced to easily start fuzzing campaigns.
+* `build.sh`: File used to build the contanier.
+* `run-container.sh`: File used to run the contanier produced to easily start fuzzing campaigns.
 
 
 ## Getting Started (Building the Fuzzing Environment)
