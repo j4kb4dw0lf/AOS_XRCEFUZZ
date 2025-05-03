@@ -19,61 +19,66 @@ if [ "$VERBOSITY" -lt 0 ] || [ "$VERBOSITY" -gt 6 ]; then
     exit 1
 fi
 
+SESSION_NAME="fuzz_session"
+
 cleanup() {
-    echo "[•] Cleaning up processes..."
-    kill "$AGENT_PID" 2>/dev/null
-    kill "$FUZZER_PID" 2>/dev/null
-    pkill -P $$ 2>/dev/null
-    rm -rf "$PORT" 2>/dev/null 
+    echo "[•] Cleaning up tmux session and temp files..."
+    tmux kill-session -t "$SESSION_NAME" 2>/dev/null
+    rm -rf "$PORT" 2>/dev/null
 }
 
 trap cleanup EXIT INT TERM
 
-echo "[•] Starting MicroXRCEAgent on port $PORT with verbosity $VERBOSITY"
-./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
-AGENT_PID=$!
-
-sleep 2
-
-echo "[•] Launching clients and capturing traffic for $CAPTURE_TIME seconds"
-{
-    # Run clients in background
-    ./runall_clients.sh "$PORT" "$CAPTURE_TIME" &
-    CLIENTS_PID=$!
-    
-    # Capture traffic in foreground
-    ./aflnet_pcap_pipeline.sh "$PORT" "$CAPTURE_TIME"
-    
-    # Wait for clients to finish (they should be done by now due to timeout)
-    wait "$CLIENTS_PID"
-} &
-CAPTURE_PID=$!
-
-wait "$CAPTURE_PID"
-
+# Setup seeds and output dirs
 SEEDS_DIR="/app/aflnet/seeds"
-mkdir -p "/app/aflnet/seeds"
+mkdir -p "$SEEDS_DIR"
 mkdir -p "/app/aflnet/outputs"
 rm -rf "$SEEDS_DIR/$PORT"
+
+echo "[•] Capturing traffic for $CAPTURE_TIME seconds"
+./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 > /dev/null 2>&1 &
+AGENT_PID=$!
+
+echo "[•] Launching clients and capturing traffic for $CAPTURE_TIME seconds"
+
+./runall_clients.sh "$PORT" "$CAPTURE_TIME" &
+CLIENTS_PID=$!
+
+./aflnet_pcap_pipeline.sh "$PORT" "$CAPTURE_TIME" &
+PCAP_PID=$!
+
+wait "$CLIENTS_PID"
+wait "$PCAP_PID"
+
+kill "$AGENT_PID" 2>/dev/null
+
 echo "[•] Moving captured packets to seeds directory"
-mv "$PORT" "$SEEDS_DIR" 2>/dev/null || {
-    echo "[ERROR] Failed to move captured packets to seeds directory"
-    exit 1
-}
-
-echo "[•] Starting AFLNet fuzzer campaign (timeout: ${CAMPAIGN_TIME:-infinite} seconds)"
-if [ "$CAMPAIGN_TIME" -gt 0 ]; then
-    timeout "$CAMPAIGN_TIME" \
-    ./../aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
-    -N "udp://127.0.0.1/$PORT" -R -P "XRCE-DDS" -m 100 \
-    ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
+if [ -d "$PORT" ]; then
+    mv "$PORT" "$SEEDS_DIR" 2>/dev/null || {
+        echo "[ERROR] Failed to move captured packets to seeds directory"
+        exit 1
+    }
 else
-    ./../aflnet/afl-fuzz -d -i "$SEEDS_DIR/$PORT" -o "/app/aflnet/outputs/$OUTPUT_DIR" \
-    -N "udp://127.0.0.1/$PORT" -R -P "XRCE-DDS" -m 100 \
-    ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p "$PORT" -v "$VERBOSITY" -d 7400 &
+    echo "[ERROR] Directory $PORT does not exist"
+    exit 1
 fi
-FUZZER_PID=$!
 
-wait "$FUZZER_PID"
+tmux kill-session -t "$SESSION_NAME" 2>/dev/null
+
+tmux new-session -d -s "$SESSION_NAME" -n fuzzing
+
+# Left pane → MicroXRCEAgent
+tmux send-keys -t "$SESSION_NAME":0.0 "./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p $PORT -v $VERBOSITY -d 7400" C-m
+
+# Split right pane → AFLNet
+tmux split-window -h -t "$SESSION_NAME":0
+if [ "$CAMPAIGN_TIME" -gt 0 ]; then
+    tmux send-keys -t "$SESSION_NAME":0.1 "timeout $CAMPAIGN_TIME ./../aflnet/afl-fuzz -d -i $SEEDS_DIR/$PORT -o /app/aflnet/outputs/$OUTPUT_DIR -N udp://127.0.0.1/$PORT -R -P XRCE-DDS -m 100 ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p $PORT -v $VERBOSITY -d 7400" C-m
+else
+    tmux send-keys -t "$SESSION_NAME":0.1 "./../aflnet/afl-fuzz -d -i $SEEDS_DIR/$PORT -o /app/aflnet/outputs/$OUTPUT_DIR -N udp://127.0.0.1/$PORT -R -P XRCE-DDS -m 100 ./../Micro-XRCE-DDS-Agent/build/MicroXRCEAgent udp4 -p $PORT -v $VERBOSITY -d 7400" C-m
+fi
+
+# Attach the tmux session so the user sees the split
+tmux attach-session -t "$SESSION_NAME"
 
 echo "[OK] Fuzzing campaign completed"

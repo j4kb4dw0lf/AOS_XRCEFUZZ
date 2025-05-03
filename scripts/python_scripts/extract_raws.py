@@ -32,7 +32,7 @@ if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage: python3 extract_raws.py <input.pcap> <server_port> <output_dir>")
         sys.exit(1)
-    print("Extracting flows from", sys.argv[1], "to", sys.argv[3])
-    print("Server port", sys.argv[2])
-    print("Output dir", sys.argv[3])
+    print("[•] Extracting flows from", sys.argv[1], "to", sys.argv[3])
+    print("[•] Server port", sys.argv[2])
+    print("[•] Output dir", sys.argv[3])
     extract_all_flows(sys.argv[1], int(sys.argv[2]), sys.argv[3])

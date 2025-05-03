@@ -21,6 +21,7 @@ RUN apt-get update && \
     libnl-3-dev \
     libnl-genl-3-dev \
     wget \
+    tcpdump \
     python3 \
     python3-pip \
     python3-dev \
@@ -31,7 +32,8 @@ RUN apt-get update && \
     echo "deb [signed-by=/usr/share/keyrings/llvm.gpg] http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main" > /etc/apt/sources.list.d/llvm.list && \
     apt-get update && \
     apt-get install -y clang-11 llvm-11 llvm-11-dev libclang-11-dev && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    pip install scapy
 
 # Set working directory inside the container
 WORKDIR /app
@@ -86,11 +88,6 @@ RUN mkdir -p Micro-XRCE-DDS-Agent/build && \
     make && \
     make install && \
     cd ../..
-
-RUN apt update && \
-    apt install tcpdump
-
-RUN pip install scapy
 
 # Copy all useful dirs from repo in the container
 # COPY ./scripts /app/scripts
