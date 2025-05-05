@@ -1,6 +1,6 @@
 # XRCE_FUZZ: Fuzzing the Micro-XRCE-DDS Agent
 
-This repository contains all resources developed as part of the project for the course **Advanced Operating Systems** at **[Politecnico di Milano]** in the academic year **[2024/2025]** by **[JAcopo Viganò, Lorenzo Della Matera]**.
+This repository contains all resources developed as part of the project for the course **Advanced Operating Systems** at **Politecnico di Milano** in the academic year **2024/2025** by **Jacopo Viganò, Lorenzo Della Matera**.
 
 ## Project Goal
 
