@@ -31,7 +31,7 @@ The recommended way to set up the environment is using the provided Dockerfile. 
 1.  **Prerequisites:** Ensure you have Docker installed on your system.
 2.  **Clone this repository:**
     ```bash
-    [git clone [https://github.com/j4kb4dw0lf/AOS_XRCEFUZZ.git](https://github.com/j4kb4dw0lf/AOS_XRCEFUZZ)
+    git clone https://github.com/j4kb4dw0lf/AOS_XRCEFUZZ.git
     cd AOS_XRCEFUZZ
     ```
 3.  **Build the Docker Image:** Navigate into the cloned repository directory and build the Docker image using the provided `Dockerfile` via the `build.sh` file. This process will install dependencies, clone the Micro-XRCE-DDS-client and Micro-XRCE-DDS-agent and AFLnet repositories, and set up the environment as defined in the Dockerfile.
