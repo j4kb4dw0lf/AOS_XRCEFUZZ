@@ -40,9 +40,9 @@ The recommended way to set up the environment is using the provided Dockerfile. 
     ./build.sh
     ```
     This might take some time depending on your internet connection and system performance.
-4.  **Run a Container:** Once the image is built, you can launch a container from it using the same script.
+4.  **Run a Container:** Once the image is built, you can launch a container from it using the script.
     ```bash
-    ./build.sh
+    ./run-container.sh
     ```
     You are now inside the fuzzing environment container. The Micro-XRCE-DDS and AFLnet sources, along with other tools, will be available in the `/app` directory as defined in the Dockerfile.
 
