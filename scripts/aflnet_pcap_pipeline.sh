@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Usage: ./aflnet_pcap_pipeline.sh <PORT> <CAPTURE_DURATION_SECONDS>
+# Usage: ./aflnet_pcap_pipeline.sh <agent_port> <capture_duration_seconds>
 
 PORT=$1
 DURATION=$2
@@ -9,7 +9,7 @@ SEEDS_DIR=$1
 PYTHON_SCRIPT="python_scripts/extract_raws.py"
 
 if [ -z "$PORT" ] || [ -z "$DURATION" ]; then
-  echo "Usage: $0 <PORT> <CAPTURE_DURATION_SECONDS>"
+  echo "Usage: $0 <agent_port> <capture_duration_seconds>"
   exit 1
 fi
 

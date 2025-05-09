@@ -2,7 +2,7 @@
 
 # Check for required arguments
 if [ $# -lt 3 ]; then
-    echo "Usage: $0 <port> <output_dir> <capture_time> [campaign_time] [verbosity]"
+    echo "Usage: $0 <agent_port> <output_dir> <capture_time> [campaign_time] [verbosity]"
     echo "Example: $0 1234 output1 30 3600 4"
     exit 1
 fi

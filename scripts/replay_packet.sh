@@ -2,7 +2,7 @@
 
 # Check if at least 2 arguments are provided
 if [ "$#" -lt 2 ]; then
-    echo "Usage: $0 <port> <packet1.raw> [<packet2.raw> ...]"
+    echo "Usage: $0 <agent_port> <packet1.raw> [<packet2.raw> ...]"
     exit 1
 fi
 

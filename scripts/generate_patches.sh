@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Cartelle di input/output
-UNPATCHED_DIR="unpatched-files"
-PATCHED_DIR="patched-files"
+UNPATCHED_DIR="unpatched_files"
+PATCHED_DIR="patched_files"
 PATCHES_DIR="patches"
 
 # Crea la cartella di output se non esiste
@@ -19,6 +19,6 @@ for unpatched_file in "$UNPATCHED_DIR"/*; do
         diff -u "$unpatched_file" "$patched_file" > "$PATCHES_DIR/$filename.patch"
         echo "[OK]	Patch generated: $PATCHES_DIR/$filename.patch"
     else
-        echo "[ERROR]	File not found in folder patched-files: $filename"
+        echo "[ERROR]	File not found in folder patched_files: $filename"
     fi
 done
