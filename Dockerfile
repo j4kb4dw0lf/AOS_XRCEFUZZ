@@ -39,7 +39,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # Clone the repositories
-RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Agent/ Micro-XRCE-DDS-Agent
+RUN git clone --branch v3.0.1 https://github.com/eProsima/Micro-XRCE-DDS-Agent/ Micro-XRCE-DDS-Agent
 RUN git clone https://github.com/eProsima/Micro-XRCE-DDS-Client/ Micro-XRCE-DDS-Client
 RUN git clone https://github.com/aflnet/aflnet/
 

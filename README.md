@@ -83,9 +83,9 @@ This script deals with the **entire fuzzing pipeline**, launches the agent insta
 
 Script used to **remove** our proposed **patches** from the agent and rebuild it without them.
 
-* `time_capsule.sh`
+* `time_capsule.sh [workon|latest]`
 
-Script that when used either takes back the agent repo to the commit we worked on or takes it to the head of the main branch and afterwards rebuilds the agent.
+Script that when used either takes back the agent repo to the commit we worked on `workon` or takes it to the head of the main branch `latest` and afterwards rebuilds the agent.
 **Please notice all patches applied to agent by the script `patch_agent.sh` are only supposed to work in the commit we worked on, by using the time capsule script the patches to the bugs will be the ones implemented by eprosima itself.**
 
 #### Python scripts

@@ -5,6 +5,9 @@ AGENT_REPO_DIR="/app/Micro-XRCE-DDS-Agent"
 
 WORKED_ON_COMMIT="155cfaaf8b7abac2e85d4a62d3649b09ace0be55"
 
+export PATH="/usr/lib/llvm-11/bin:${PATH}"
+export LLVM_CONFIG="/usr/lib/llvm-11/bin/llvm-config"
+
 set -e
 
 usage() {
