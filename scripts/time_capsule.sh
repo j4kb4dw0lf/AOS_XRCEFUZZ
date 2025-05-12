@@ -50,16 +50,16 @@ if [ "$ACTION" = "workon" ]; then
 
 
 elif [ "$ACTION" = "latest" ]; then
-    echo "[•] Switching to head of 'main' branch"
-    if ! git checkout main; then
-        echo "[ERROR] Failed to checkout 'main' branch."
+    echo "[•] Switching to head of 'master' branch"
+    if ! git checkout master; then
+        echo "[ERROR] Failed to checkout 'master' branch."
         exit 1
     fi
-    if ! git pull origin main; then
-        echo "[ERROR] Failed to pull latest changes from 'main'."
+    if ! git pull origin master; then
+        echo "[ERROR] Failed to pull latest changes from 'master'."
         exit 1
     fi
-    echo "[OK] Successfully switched to and pulled latest 'main'."
+    echo "[OK] Successfully switched to and pulled latest 'master'."
 fi
 
 echo "[•] Rebuilding the agent..."

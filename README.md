@@ -86,7 +86,7 @@ Script used to **remove** our proposed **patches** from the agent and rebuild it
 * `time_capsule.sh [workon|latest]`
 
 Script that when used either takes back the agent repo to the commit we worked on `workon` or takes it to the head of the main branch `latest` and afterwards rebuilds the agent.
-**Please notice all patches applied to agent by the script `patch_agent.sh` are only supposed to work in the commit we worked on, by using the time capsule script the patches to the bugs will be the ones implemented by eprosima itself.**
+**Please notice all patches applied to agent by the script `patch_agent.sh` are only supposed to work in the commit we worked on, by using the time capsule script the patches to the bugs will be the ones implemented by eprosima itself and using the script on later releases may lead to undefined behaviour.**
 
 #### Python scripts
 
